@@ -3,7 +3,7 @@
 BagTheGoose is an AI-powered Chrome extension and web platform that helps students discover, evaluate, and track internship opportunities.
 
 ## Planned Features
-- LinkedIn job scraping
+- LinkedIn and WaterlooWorks job scraping
 - Resume upload and parsing
 - AI job matching
 - Reach / Target / Safety scoring
