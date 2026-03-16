@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BagTheGoose</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="popup__header">
+        <div class="popup__brand">
+          <span class="popup__logo" aria-hidden="true">🪿</span>
+          <div>
+            <p class="popup__eyebrow">BagTheGoose</p>
+            <h1 class="popup__title">Extension Status</h1>
+          </div>
+        </div>
+        <p id="statusLabel" class="popup__status">Idle</p>
+      </header>
+
+      <section class="popup__actions">
+        <button id="startButton" class="popup__button popup__button--primary">Start extraction</button>
+        <button id="resetButton" class="popup__button">Reset</button>
+      </section>
+
+      <section class="popup__metrics">
+        <div class="metric">
+          <span class="metric__label">Scanned</span>
+          <strong id="scannedValue">0</strong>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Shortlisted</span>
+          <strong id="shortlistedValue">0</strong>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Deep extracted</span>
+          <strong id="deepExtractedValue">0</strong>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Uploaded</span>
+          <strong id="uploadedValue">0</strong>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Skipped</span>
+          <strong id="skippedValue">0</strong>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Errors</span>
+          <strong id="errorsValue">0</strong>
+        </div>
+      </section>
+
+      <section class="popup__panel">
+        <p class="popup__panel-label">Current page</p>
+        <p id="pageValue" class="popup__panel-value">No active scan</p>
+      </section>
+
+      <section class="popup__panel">
+        <p class="popup__panel-label">Last error</p>
+        <p id="errorValue" class="popup__panel-value">None</p>
+      </section>
+
+      <section class="popup__panel">
+        <p class="popup__panel-label">Activity</p>
+        <ul id="logList" class="popup__logs"></ul>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+  </html>

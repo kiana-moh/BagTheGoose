@@ -1,18 +1,9 @@
 {
-  "name": "extension",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "bagthegoose-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension for deterministic LinkedIn job extraction and prefiltering",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "@types/chrome": "^0.1.37",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.0"
+    "check": "echo 'Load this folder as an unpacked extension in Chrome.'"
   }
 }

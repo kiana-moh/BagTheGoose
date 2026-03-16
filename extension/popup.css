@@ -1,0 +1,151 @@
+:root {
+  color-scheme: light;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --bg: #f4efe5;
+  --surface: #fffaf1;
+  --ink: #1f1b16;
+  --muted: #6d665d;
+  --accent: #d76e2d;
+  --line: #e5d6c4;
+  --error: #9b2c2c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 360px;
+  background: radial-gradient(circle at top, #fff4da, var(--bg) 60%);
+  color: var(--ink);
+}
+
+.popup {
+  padding: 16px;
+}
+
+.popup__header {
+  margin-bottom: 14px;
+}
+
+.popup__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.popup__logo {
+  font-size: 28px;
+}
+
+.popup__eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.popup__title {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.popup__status {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.popup__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.popup__button {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.popup__button--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.popup__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.popup__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.metric,
+.popup__panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.metric {
+  padding: 10px 12px;
+}
+
+.metric__label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.popup__panel {
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.popup__panel-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.popup__panel-value {
+  margin: 0;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.popup__logs {
+  margin: 0;
+  padding-left: 16px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.popup__log {
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.popup__log--error {
+  color: var(--error);
+}
