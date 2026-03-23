@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --paper: #fcfbf8;
+  --paper-strong: #ffffff;
+  --shell: #f5f1e8;
+  --ink: #111215;
+  --muted: #6c6a63;
+  --line: rgba(17, 18, 21, 0.08);
+  --line-strong: rgba(17, 18, 21, 0.14);
+  --yellow-soft: #f7edc6;
+  --yellow: #d3a11d;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(241, 193, 47, 0.11), transparent 24%),
+    linear-gradient(180deg, #fdfcf8 0%, #f8f5ee 100%);
+  color: var(--ink);
+  letter-spacing: -0.012em;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+::selection {
+  background: rgba(211, 161, 29, 0.2);
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .bg-shell-gradient {
+    background:
+      radial-gradient(circle at top left, rgba(241, 193, 47, 0.11), transparent 24%),
+      linear-gradient(180deg, #fdfcf8 0%, #f8f5ee 100%);
+  }
+
+  .bg-panel-white {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .border-shell {
+    border-color: var(--line);
+  }
+
+  .border-shell-strong {
+    border-color: var(--line-strong);
+  }
+
+  .text-muted {
+    color: var(--muted);
+  }
+}

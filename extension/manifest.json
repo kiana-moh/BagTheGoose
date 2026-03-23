@@ -6,12 +6,22 @@
   "permissions": [
     "storage",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "https://www.linkedin.com/*",
-    "http://127.0.0.1:8000/*"
+    "http://127.0.0.1:8000/*",
+    "https://api.bagthegoose.com/*"
   ],
+  "externally_connectable": {
+    "matches": [
+      "https://bagthegoose.com/*",
+      "https://www.bagthegoose.com/*",
+      "http://localhost:3000/*",
+      "http://127.0.0.1:3000/*"
+    ]
+  },
   "background": {
     "service_worker": "background.js"
   },

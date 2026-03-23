@@ -1,8 +1,16 @@
 const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
-const JOBS_ENDPOINT = `${API_BASE_URL}/jobs`;
+const JOBS_ENDPOINT = `${API_BASE_URL}/jobs/import`;
+const EXTENSION_BOOTSTRAP_ENDPOINT = `${API_BASE_URL}/extension/bootstrap`;
 const STATE_KEY = "bagTheGooseState";
 const PROFILE_KEY = "bagTheGooseProfile";
+const AUTH_KEY = "bagTheGooseAuth";
 const MAX_LOGS = 20;
+const ALLOWED_WEB_APP_ORIGINS = new Set([
+  "https://bagthegoose.com",
+  "https://www.bagthegoose.com",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+]);
 
 const DEFAULT_PROFILE = {
   desiredRoleKeywords: [
@@ -112,6 +120,29 @@ async function getProfile() {
   };
 }
 
+async function getAuth() {
+  const stored = await chrome.storage.local.get(AUTH_KEY);
+  return stored[AUTH_KEY] || null;
+}
+
+async function setAuth(authState) {
+  await chrome.storage.local.set({ [AUTH_KEY]: authState });
+  return authState;
+}
+
+function isOriginAllowed(senderUrl) {
+  if (!senderUrl) {
+    return false;
+  }
+
+  try {
+    const origin = new URL(senderUrl).origin;
+    return ALLOWED_WEB_APP_ORIGINS.has(origin);
+  } catch {
+    return false;
+  }
+}
+
 function addLog(state, message, level = "info") {
   const entry = {
     id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
@@ -137,10 +168,16 @@ async function recordError(message) {
 }
 
 async function postJob(jobPayload) {
+  const auth = await getAuth();
+  if (!auth?.accessToken) {
+    throw new Error("Extension is not authenticated. Visit BagTheGoose while logged in.");
+  }
+
   const response = await fetch(JOBS_ENDPOINT, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${auth.accessToken}`
     },
     body: JSON.stringify(jobPayload)
   });
@@ -153,6 +190,40 @@ async function postJob(jobPayload) {
   return response.json();
 }
 
+async function exchangeBootstrapGrant(bootstrapToken, senderUrl) {
+  const response = await fetch(EXTENSION_BOOTSTRAP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      bootstrapToken,
+      extensionId: chrome.runtime.id,
+      extensionVersion: chrome.runtime.getManifest().version,
+      sourceOrigin: senderUrl ? new URL(senderUrl).origin : null
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Auth bootstrap failed with ${response.status}: ${errorText}`);
+  }
+
+  const authPayload = await response.json();
+  await setAuth({
+    accessToken: authPayload.accessToken,
+    expiresAt: authPayload.expiresAt,
+    user: authPayload.user,
+    authenticatedAt: new Date().toISOString()
+  });
+
+  await updateState((state) =>
+    addLog(state, `Authenticated extension for ${authPayload.user.email || authPayload.user.id}.`)
+  );
+
+  return authPayload;
+}
+
 async function sendMessageToActiveTab(message) {
   const [tab] = await chrome.tabs.query({
     active: true,
@@ -163,7 +234,33 @@ async function sendMessageToActiveTab(message) {
     throw new Error("No active tab available.");
   }
 
-  return chrome.tabs.sendMessage(tab.id, message);
+  try {
+    return await chrome.tabs.sendMessage(tab.id, message);
+  } catch (error) {
+    const messageText = error instanceof Error ? error.message : String(error || "");
+    const isMissingReceiver =
+      messageText.includes("Receiving end does not exist") ||
+      messageText.includes("Could not establish connection");
+
+    if (!isMissingReceiver) {
+      throw error;
+    }
+
+    if (!tab.url || !tab.url.startsWith("https://www.linkedin.com/jobs/")) {
+      throw new Error("Open a LinkedIn jobs page before starting extraction.");
+    }
+
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["content.js"]
+    });
+
+    await updateState((state) =>
+      addLog(state, "Injected content script into the active LinkedIn tab.")
+    );
+
+    return chrome.tabs.sendMessage(tab.id, message);
+  }
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -173,13 +270,54 @@ chrome.runtime.onInstalled.addListener(async () => {
   await chrome.storage.local.set({ [PROFILE_KEY]: profile });
 });
 
+chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+  void (async () => {
+    try {
+      if (!isOriginAllowed(sender.url)) {
+        sendResponse({ ok: false, error: "Unauthorized sender origin." });
+        return;
+      }
+
+      switch (message?.type) {
+        case "BAG_THE_GOOSE_PING": {
+          sendResponse({
+            ok: true,
+            extensionId: chrome.runtime.id,
+            version: chrome.runtime.getManifest().version
+          });
+          return;
+        }
+        case "BAG_THE_GOOSE_BOOTSTRAP_AUTH": {
+          if (!message.bootstrapToken) {
+            sendResponse({ ok: false, error: "Missing bootstrap token." });
+            return;
+          }
+
+          const authPayload = await exchangeBootstrapGrant(message.bootstrapToken, sender.url);
+          sendResponse({ ok: true, auth: authPayload });
+          return;
+        }
+        default: {
+          sendResponse({ ok: false, error: "Unknown external message type." });
+        }
+      }
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : "Unknown auth error.";
+      await recordError(messageText);
+      sendResponse({ ok: false, error: messageText });
+    }
+  })();
+
+  return true;
+});
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   void (async () => {
     try {
       switch (message?.type) {
         case "BAG_THE_GOOSE_GET_STATE": {
-          const [state, profile] = await Promise.all([getState(), getProfile()]);
-          sendResponse({ ok: true, state, profile });
+          const [state, profile, auth] = await Promise.all([getState(), getProfile(), getAuth()]);
+          sendResponse({ ok: true, state, profile, auth });
           return;
         }
         case "BAG_THE_GOOSE_RESET_STATE": {

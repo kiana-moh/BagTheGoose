@@ -8,6 +8,8 @@ const elements = {
   uploaded: document.getElementById("uploadedValue"),
   skipped: document.getElementById("skippedValue"),
   errors: document.getElementById("errorsValue"),
+  connectionBadge: document.getElementById("connectionBadge"),
+  connectionUser: document.getElementById("connectionUser"),
   page: document.getElementById("pageValue"),
   error: document.getElementById("errorValue"),
   logs: document.getElementById("logList"),
@@ -15,7 +17,7 @@ const elements = {
   resetButton: document.getElementById("resetButton")
 };
 
-function renderState(state) {
+function renderState(state, auth) {
   elements.status.textContent = state.status || "idle";
   elements.scanned.textContent = String(state.scanned || 0);
   elements.shortlisted.textContent = String(state.shortlisted || 0);
@@ -26,6 +28,7 @@ function renderState(state) {
   elements.page.textContent = state.currentPage || "No active scan";
   elements.error.textContent = state.lastError || "None";
   elements.startButton.disabled = Boolean(state.running);
+  renderConnection(auth);
 
   const logs = state.logs || [];
   elements.logs.innerHTML = "";
@@ -46,10 +49,29 @@ function renderState(state) {
   }
 }
 
+function renderConnection(auth) {
+  const isConnected = Boolean(auth?.accessToken && auth?.user);
+
+  elements.connectionBadge.textContent = isConnected ? "Connected" : "Not connected";
+  elements.connectionBadge.className = `popup__connection-badge ${
+    isConnected
+      ? "popup__connection-badge--connected"
+      : "popup__connection-badge--disconnected"
+  }`;
+
+  if (!isConnected) {
+    elements.connectionUser.textContent = "No authenticated user";
+    return;
+  }
+
+  const userLabel = auth.user.name || auth.user.email || auth.user.id || "Unknown user";
+  elements.connectionUser.textContent = `Connected as ${userLabel}`;
+}
+
 async function fetchState() {
   const response = await chrome.runtime.sendMessage({ type: "BAG_THE_GOOSE_GET_STATE" });
   if (response?.ok) {
-    renderState(response.state);
+    renderState(response.state, response.auth);
   }
 }
 
@@ -73,11 +95,11 @@ elements.resetButton.addEventListener("click", async () => {
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== "local" || !changes[STATE_KEY]) {
+  if (areaName !== "local") {
     return;
   }
 
-  renderState(changes[STATE_KEY].newValue || {});
+  void fetchState();
 });
 
 void fetchState();

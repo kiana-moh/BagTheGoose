@@ -133,6 +133,35 @@ body {
   word-break: break-word;
 }
 
+.popup__connection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup__connection-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.popup__connection-badge--connected {
+  background: #e7f7ee;
+  border-color: #b8e2c8;
+  color: #21643a;
+}
+
+.popup__connection-badge--disconnected {
+  background: #fff3e8;
+  border-color: #f0d2ba;
+  color: #8a4b20;
+}
+
 .popup__logs {
   margin: 0;
   padding-left: 16px;

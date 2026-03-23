@@ -1,0 +1,6 @@
+{
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js",
+  "/(protected)/profile/page": "app/(protected)/profile/page.js",
+  "/(protected)/tracker/page": "app/(protected)/tracker/page.js"
+}

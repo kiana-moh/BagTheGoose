@@ -1,0 +1,139 @@
+bagthegoose/
+│
+├── apps/
+│   │
+│   ├── extension/                # Chrome extension
+│   │   ├── manifest.json
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   │
+│   │   ├── public/
+│   │   │   └── icons/
+│   │   │       ├── icon16.png
+│   │   │       ├── icon48.png
+│   │   │       └── icon128.png
+│   │   │
+│   │   ├── src/
+│   │   │   ├── background/        # service worker
+│   │   │   │   └── background.ts
+│   │   │   │
+│   │   │   ├── content/           # LinkedIn DOM logic
+│   │   │   │   ├── extractor.ts
+│   │   │   │   ├── filters.ts
+│   │   │   │   └── linkedin.ts
+│   │   │   │
+│   │   │   ├── popup/             # extension UI
+│   │   │   │   ├── popup.html
+│   │   │   │   ├── popup.tsx
+│   │   │   │   └── popup.css
+│   │   │   │
+│   │   │   ├── messaging/         # extension messaging
+│   │   │   │   ├── messages.ts
+│   │   │   │   └── router.ts
+│   │   │   │
+│   │   │   ├── api/               # calls to your backend
+│   │   │   │   └── client.ts
+│   │   │   │
+│   │   │   └── utils/
+│   │   │       └── storage.ts
+│   │   │
+│   │   └── dist/                  # built extension
+│   │
+│   │
+│   ├── web/                       # Web application
+│   │   ├── package.json
+│   │   ├── next.config.js
+│   │   │
+│   │   ├── public/
+│   │   │
+│   │   ├── src/
+│   │   │   ├── app/                # Next.js app router
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── dashboard/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── onboarding/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── connect-extension/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── onboarding/
+│   │   │   │   └── jobs/
+│   │   │   │
+│   │   │   ├── lib/
+│   │   │   │   ├── auth.ts
+│   │   │   │   ├── api.ts
+│   │   │   │   └── resume-parser.ts
+│   │   │   │
+│   │   │   ├── hooks/
+│   │   │   │
+│   │   │   └── styles/
+│   │   │
+│   │   └── middleware.ts
+│   │
+│   │
+│   └── api/                       # Backend server
+│       ├── package.json
+│       ├── tsconfig.json
+│       │
+│       ├── src/
+│       │   ├── server.ts
+│       │   │
+│       │   ├── routes/
+│       │   │   ├── auth.ts
+│       │   │   ├── users.ts
+│       │   │   ├── jobs.ts
+│       │   │   ├── extension.ts
+│       │   │   └── onboarding.ts
+│       │   │
+│       │   ├── controllers/
+│       │   │   ├── authController.ts
+│       │   │   ├── jobController.ts
+│       │   │   └── extensionController.ts
+│       │   │
+│       │   ├── services/
+│       │   │   ├── jobMatcher.ts
+│       │   │   ├── resumeAnalyzer.ts
+│       │   │   ├── llmService.ts
+│       │   │   └── emailService.ts
+│       │   │
+│       │   ├── db/
+│       │   │   ├── prisma.ts
+│       │   │   └── schema.prisma
+│       │   │
+│       │   ├── middleware/
+│       │   │   ├── authMiddleware.ts
+│       │   │   └── errorHandler.ts
+│       │   │
+│       │   └── utils/
+│       │
+│       └── prisma/
+│           └── migrations/
+│
+│
+├── packages/                     # Shared code across apps
+│   ├── types/
+│   │   └── job.ts
+│   │
+│   ├── utils/
+│   │   └── textProcessing.ts
+│   │
+│   └── config/
+│       └── constants.ts
+│
+│
+├── infrastructure/
+│   ├── docker/
+│   │   ├── api.Dockerfile
+│   │   └── web.Dockerfile
+│   │
+│   └── terraform/
+│
+│
+├── scripts/
+│   └── seedDatabase.ts
+│
+├── package.json
+├── turbo.json / pnpm-workspace.yaml
+└── README.md

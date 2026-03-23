@@ -1,24 +1,33 @@
 const CARD_SELECTOR = [
   ".jobs-search-results__list-item",
   ".scaffold-layout__list-item",
-  "li[data-occludable-job-id]"
+  "li[data-occludable-job-id]",
+  ".job-card-container",
+  ".job-card-list",
+  "[data-job-id]"
 ].join(", ");
 
 const CARD_TITLE_SELECTOR = [
   ".job-card-list__title",
   ".job-card-container__link",
-  "a.job-card-container__link"
+  "a.job-card-container__link",
+  "a[href*='/jobs/view/']",
+  ".job-card-container a"
 ].join(", ");
 
 const CARD_COMPANY_SELECTOR = [
   ".artdeco-entity-lockup__subtitle",
   ".job-card-container__company-name",
-  ".job-card-container__primary-description"
+  ".job-card-container__primary-description",
+  ".artdeco-entity-lockup__subtitle span",
+  ".job-card-container__subtitle"
 ].join(", ");
 
 const CARD_LOCATION_SELECTOR = [
   ".job-card-container__metadata-item",
-  ".artdeco-entity-lockup__caption"
+  ".artdeco-entity-lockup__caption",
+  ".job-card-container__footer-item",
+  ".job-card-container__metadata-wrapper li"
 ].join(", ");
 
 const DETAIL_TITLE_SELECTOR = [
@@ -104,15 +113,82 @@ async function uploadJob(job, prefilter) {
 }
 
 function getCards() {
-  return Array.from(document.querySelectorAll(CARD_SELECTOR)).filter((card) => {
+  const directCards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter((card) => {
     const title = textFrom(card, CARD_TITLE_SELECTOR);
+    return Boolean(title);
+  });
+
+  if (directCards.length > 0) {
+    return directCards;
+  }
+
+  const linkCards = Array.from(document.querySelectorAll("a[href*='/jobs/view/']"))
+    .map((link) => {
+      return (
+        link.closest("li") ||
+        link.closest(".job-card-container") ||
+        link.closest(".job-card-list") ||
+        link.closest("[data-job-id]") ||
+        link.parentElement
+      );
+    })
+    .filter(Boolean);
+
+  const uniqueCards = [];
+  const seen = new Set();
+
+  for (const card of linkCards) {
+    if (!card) {
+      continue;
+    }
+
+    if (seen.has(card)) {
+      continue;
+    }
+
+    seen.add(card);
+    uniqueCards.push(card);
+  }
+
+  return uniqueCards.filter((card) => {
+    const title =
+      textFrom(card, CARD_TITLE_SELECTOR) ||
+      normalizeWhitespace(card.querySelector("a[href*='/jobs/view/']")?.textContent || "");
     return Boolean(title);
   });
 }
 
+function getScrollableContainers() {
+  return Array.from(
+    document.querySelectorAll(
+      ".jobs-search-results-list, .scaffold-layout__list, .scaffold-layout__content, main"
+    )
+  );
+}
+
+async function waitForCards() {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const cards = getCards();
+    if (cards.length > 0) {
+      return cards;
+    }
+
+    for (const container of getScrollableContainers()) {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "auto" });
+    await sleep(700);
+  }
+
+  return [];
+}
+
 function extractCardSummary(card) {
   const link = card.querySelector("a[href*='/jobs/view/']");
-  const title = textFrom(card, CARD_TITLE_SELECTOR);
+  const title =
+    textFrom(card, CARD_TITLE_SELECTOR) ||
+    normalizeWhitespace(link?.textContent || "");
   const company = textFrom(card, CARD_COMPANY_SELECTOR);
   const location = textFrom(card, CARD_LOCATION_SELECTOR);
   const href = link?.href || "";
@@ -302,7 +378,7 @@ async function scanLinkedInJobs() {
     const state = initial?.state || {};
     const profile = initial?.profile || {};
     const seenKeys = new Set(state.seenJobKeys || []);
-    const cards = getCards();
+    const cards = await waitForCards();
 
     await patchState(
       {
@@ -310,7 +386,13 @@ async function scanLinkedInJobs() {
         status: "extracting",
         running: true
       },
-      { level: "info", message: `Found ${cards.length} job cards on page.` }
+      {
+        level: "info",
+        message:
+          cards.length > 0
+            ? `Found ${cards.length} job cards on page.`
+            : `Found 0 job cards on page. URL: ${window.location.pathname}. Links: ${document.querySelectorAll("a[href*='/jobs/view/']").length}`
+      }
     );
 
     for (const card of cards) {

@@ -1,0 +1,14 @@
+{
+  "/api/resume/analyze/route": "/api/resume/analyze",
+  "/api/v1/[...path]/route": "/api/v1/[...path]",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
+  "/page": "/",
+  "/(auth)/login/page": "/login",
+  "/(auth)/signup/page": "/signup",
+  "/(protected)/dashboard/page": "/dashboard",
+  "/(protected)/profile/page": "/profile",
+  "/(protected)/resume/page": "/resume",
+  "/(setup)/onboarding/page": "/onboarding",
+  "/(protected)/tracker/page": "/tracker"
+}

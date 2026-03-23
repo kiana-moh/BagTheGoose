@@ -7,7 +7,10 @@ class Settings(BaseSettings):
     debug: bool = True
     api_v1_prefix: str = "/api/v1"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    database_url: str
+    google_client_id: str
+
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()
